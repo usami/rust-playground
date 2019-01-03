@@ -125,16 +125,12 @@ fn main() {
     board.print();
 
     loop {
-        match board.game_end() {
-            Some(Result::Draw) => {
-                println!("Draw!");
-                break;
-            },
-            Some(x) => {
-                println!("{:#?} Wins!", x);
-                break;
+        if let Some(x) = board.game_end() {
+            match x {
+                Result::Draw => println!("Draw!"),
+                _ => println!("{:?} Wins!", x),
             }
-            None => {},
+            break;
         }
 
         match board.current_player {
