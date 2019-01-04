@@ -97,13 +97,13 @@ impl Board {
         match (&self.repl[0], &self.repl[4], &self.repl[8]) {
             (Some(Player::X), Some(Player::X), Some(Player::X)) => return Some(Result::X),
             (Some(Player::O), Some(Player::O), Some(Player::O)) => return Some(Result::O),
-            _ => {},
+            _ => (),
         }
 
         match (&self.repl[2], &self.repl[4], &self.repl[6]) {
             (Some(Player::X), Some(Player::X), Some(Player::X)) => return Some(Result::X),
             (Some(Player::O), Some(Player::O), Some(Player::O)) => return Some(Result::O),
-            _ => {},
+            _ => (),
         }
 
         for i in 0..9 {
