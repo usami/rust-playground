@@ -13,6 +13,7 @@ pub enum Strategy {
     Monkey,
 }
 
+#[derive(Debug)]
 enum Row {
     One,
     Two,
@@ -24,6 +25,7 @@ enum Row {
     Eight,
 }
 
+#[derive(Debug)]
 enum Column {
     A,
     B,
@@ -35,7 +37,41 @@ enum Column {
     H,
 }
 
+#[derive(Debug)]
 pub struct Move(Column, Row, Piece);
+
+impl Move {
+    pub fn new(i: usize, p: &Piece) -> Move {
+        let rem = i % 8;
+
+        let row = match (i - rem) / 8 {
+            0 => Row::One,
+            1 => Row::Two,
+            2 => Row::Three,
+            3 => Row::Four,
+            4 => Row::Five,
+            5 => Row::Six,
+            6 => Row::Seven,
+            _ => Row::Eight,
+        };
+
+        let column = match rem {
+            0 => Column::A,
+            1 => Column::B,
+            2 => Column::C,
+            3 => Column::D,
+            4 => Column::E,
+            5 => Column::F,
+            6 => Column::G,
+            _ => Column::H,
+        };
+
+        match p {
+            Piece::Black => Move(column, row, Piece::Black),
+            Piece::White => Move(column, row, Piece::White),
+        }
+    }
+}
 
 pub struct Game {
     pub board: Board,
