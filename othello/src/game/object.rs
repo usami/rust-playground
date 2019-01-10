@@ -51,7 +51,7 @@ enum Direction {
 }
 
 impl Direction {
-    pub fn forward(i: i8, d: &Direction) -> Option<usize> {
+    pub fn forward(i: i8, d: &Direction) -> i8 {
         let delta = match d {
             Direction::Up => -8,
             Direction::UpRight => -7,
@@ -62,15 +62,7 @@ impl Direction {
             Direction::Left => -1,
             Direction::UpLeft => -9,
         };
-        return Direction::validate(i + delta)
-    }
-
-    fn validate(i: i8) -> Option<usize> {
-        if i < 0 || i >= 64 {
-            return None
-        } else {
-            return Some(i as usize)
-        }
+        return i + delta
     }
 }
 
@@ -141,7 +133,6 @@ impl Board {
         let mut moves = Vec::new();
 
         for i in 0..64 {
-            println!("s: {}", i);
             if let None = self.repl[i] {
                 for d in [Direction::Up, Direction::UpRight, Direction::Right, Direction::DownRight, Direction::Down, Direction::DownLeft, Direction::Left, Direction::UpLeft].iter() {
                     if self.check_dir(i, d, p) {
@@ -156,46 +147,45 @@ impl Board {
         return moves
     }
 
+    fn valid(i: i8) -> bool {
+        return i >= 0 && i < 64
+    }
+
     fn check_dir(&self, i: usize, d: &Direction, p: &Piece) -> bool {
-        println!("i: {}, d: {:?}", i, d);
+        let mut i = Direction::forward(i as i8, d);
 
-        let j = Direction::forward(i as i8, d);
-
-        match j {
-            None => println!("no"),
-            Some(x) => println!("{}", x),
-        };
-
-        match j {
-            None => false,
-            Some(k) => {
-                if let Some(x) = &self.repl[k] {
+        if Board::valid(i) {
+            // next should be opposite color
+            match &self.repl[i as usize] {
+                None => false,
+                Some(x) => {
                     if !x.same(p) {
-                        let mut j = k;
+                        // look for same color
                         loop {
-                            let l = Direction::forward(k as i8, d);
-                            match l {
+                            i = Direction::forward(i, d);
+
+                            // out of range
+                            if !Board::valid(i) {
+                                return false
+                            }
+                            match &self.repl[i as usize] {
                                 None => return false,
-                                Some(k) => {
-                                    j = k;
-                                    println!("{}", k);
-                                    if let Some(x) = &self.repl[k] {
-                                        if x.same(p) {
-                                            return true
-                                        }
-                                    } else {
-                                        return false
+                                Some(x) => {
+                                    if x.same(p) {
+                                        return true
                                     }
+                                    // if opposite color, continue
                                 },
-                            };
+                            }
                         }
+
                     } else {
-                        return false
+                        false
                     }
-                } else {
-                    return false
-                }
+                },
             }
+        } else {
+            false
         }
     }
 }
