@@ -139,4 +139,16 @@ impl Game {
 
         self.board = self.board.put(index, p);
     }
+
+    pub fn end(&self) -> bool {
+        let b_moves = self.board.possible_moves(&Piece::Black);
+
+        if b_moves.is_empty() {
+            let w_moves = self.board.possible_moves(&Piece::White);
+
+            w_moves.is_empty()
+        } else {
+            false
+        }
+    }
 }

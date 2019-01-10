@@ -7,7 +7,10 @@ fn main() {
     game.print_board();
 
     loop {
-        // game finish
+        if game.end() {
+            // result
+            break;
+        }
 
         let player = game.current_player();
 
