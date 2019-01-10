@@ -6,15 +6,15 @@ fn main() {
 
     game.print_board();
 
-    // loop {
+    loop {
         // game finish
 
-    let player = game.current_player();
+        let player = game.current_player();
 
-    if let Some(m) = player.select_move(&game.board) {
-        game.take(&m);
-        game.print_board();
+        if let Some(m) = player.select_move(&game.board) {
+            game.take(&m);
+            game.print_board();
+        }
+        game.next_turn();
     }
-    game.next_turn();
-    // }
 }

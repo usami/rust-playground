@@ -5,13 +5,9 @@ pub struct Player {
 
 impl Player {
     pub fn select_move(&self, b: &Board) -> Option<super::Move> {
-        let possible_moves = b.possible_moves(&self.piece);
+        let mut possible_moves = b.possible_moves(&self.piece);
 
-        if possible_moves.is_empty() {
-            None
-        } else {
-            Some(super::Move(super::Column::A, super::Row::One, self.piece.clone()))
-        }
+        self.strategy.pick_move(b, &mut possible_moves)
     }
 }
 
@@ -137,7 +133,7 @@ impl Board {
                 for d in [Direction::Up, Direction::UpRight, Direction::Right, Direction::DownRight, Direction::Down, Direction::DownLeft, Direction::Left, Direction::UpLeft].iter() {
                     if self.check_dir(i, d, p) {
                         let m = super::Move::new(i, p);
-                        println!("{:?}", m);
+                        moves.push(m);
                         break;
                     }
                 }

@@ -13,6 +13,13 @@ pub enum Strategy {
     Monkey,
 }
 
+impl Strategy {
+    pub fn pick_move(&self, b: &Board, moves: &mut Vec<Move>) -> Option<Move> {
+        moves.pop()
+    }
+}
+
+
 #[derive(Debug)]
 enum Row {
     One,
@@ -106,18 +113,7 @@ impl Game {
     pub fn take(&mut self, m: &Move) {
         let Move(c, r, p) = m;
 
-        let i = match c {
-            Column::A => 0,
-            Column::B => 1,
-            Column::C => 2,
-            Column::D => 3,
-            Column::E => 4,
-            Column::F => 5,
-            Column::G => 6,
-            Column::H => 7,
-        };
-
-        let j = match r {
+        let i = match r {
             Row::One => 0,
             Row::Two => 1,
             Row::Three => 2,
@@ -126,6 +122,17 @@ impl Game {
             Row::Six => 5,
             Row::Seven => 6,
             Row::Eight => 7,
+        };
+
+        let j = match c {
+            Column::A => 0,
+            Column::B => 1,
+            Column::C => 2,
+            Column::D => 3,
+            Column::E => 4,
+            Column::F => 5,
+            Column::G => 6,
+            Column::H => 7,
         };
 
         let index = 8 * i + j;
