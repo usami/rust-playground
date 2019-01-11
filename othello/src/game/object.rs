@@ -8,6 +8,11 @@ impl Player {
         let mut possible_moves = b.possible_moves(&self.piece);
 
         self.strategy.pick_move(b, &mut possible_moves)
+        // if possible_moves.is_empty() {
+        //     None
+        // } else {
+        //     Some(self.strategy.pick_move(b, &mut possible_moves))
+        // }
     }
 }
 
@@ -47,18 +52,77 @@ enum Direction {
 }
 
 impl Direction {
-    pub fn forward(i: i8, d: &Direction) -> i8 {
-        let delta = match d {
-            Direction::Up => -8,
-            Direction::UpRight => -7,
-            Direction::Right => 1,
-            Direction::DownRight => 9,
-            Direction::Down => 8,
-            Direction::DownLeft => 7,
-            Direction::Left => -1,
-            Direction::UpLeft => -9,
-        };
-        return i + delta
+    fn same_row(i: i8, j: i8) -> bool {
+        i - i % 8 == j - j % 8
+    }
+
+    pub fn forward(i: i8, d: &Direction) -> Option<usize> {
+        match d {
+            Direction::Up => {
+                let j = i - 8;
+                if j < 0 {
+                    None
+                } else {
+                    Some(j as usize)
+                }
+            },
+            Direction::UpRight => {
+                let j = i - 7;
+                if j < 0 || Direction::same_row(i, j) {
+                    None
+                } else {
+                    Some(j as usize)
+                }
+            },
+            Direction::Right => {
+                let j = i + 1;
+                if j > 63 || Direction::same_row(i, j) {
+                    None
+                } else {
+                    Some(j as usize)
+                }
+            },
+            Direction::DownRight => {
+                let j = i + 9;
+                if j > 63 || !Direction::same_row(i, i + 1) {
+                    None
+                } else {
+                    Some(j as usize)
+                }
+            },
+            Direction::Down => {
+                let j = i + 8;
+                if j > 63 {
+                    None
+                } else {
+                    Some(j as usize)
+                }
+            },
+            Direction::DownLeft => {
+                let j = i + 7;
+                if j > 63 || Direction::same_row(i, j) {
+                    None
+                } else {
+                    Some(j as usize)
+                }
+            },
+            Direction::Left => {
+                let j = i - 1;
+                if j < 0 || Direction::same_row(i, j) {
+                    None
+                } else {
+                    Some(j as usize)
+                }
+            },
+            Direction::UpLeft => {
+                let j = i - 9;
+                if j < 0 || !Direction::same_row(i, i - 1) {
+                    None
+                } else {
+                    Some(j as usize)
+                }
+            },
+        }
     }
 }
 
@@ -122,7 +186,35 @@ impl Board {
     pub fn put(&mut self, i: usize, p: &Piece) -> Board {
         let mut board = self.clone();
         board.repl[i] = Some(p.clone());
+
+        for d in [Direction::Up, Direction::UpRight, Direction::Right, Direction::DownRight, Direction::Down, Direction::DownLeft, Direction::Left, Direction::UpLeft].iter() {
+            if board.check_dir(i, d, p) {
+                board.flips(i, d, p);
+            }
+        }
         return board
+    }
+
+    fn flips(&mut self, i: usize, d: &Direction, p: &Piece) {
+        let mut i = i;
+
+        loop {
+            if let Some(j) = Direction::forward(i as i8, d) {
+                i = j;
+                match &self.repl[i] {
+                    None => break,
+                    Some(x) => {
+                        if !x.same(p) {
+                            self.repl[i] = Some(p.clone());
+                        } else {
+                            break;
+                        }
+                    },
+                }
+            } else {
+                break;
+            }
+        }
     }
 
     pub fn possible_moves(&self, p: &Piece) -> Vec<super::Move> {
@@ -143,38 +235,30 @@ impl Board {
         return moves
     }
 
-    fn valid(i: i8) -> bool {
-        return i >= 0 && i < 64
-    }
-
     fn check_dir(&self, i: usize, d: &Direction, p: &Piece) -> bool {
-        let mut i = Direction::forward(i as i8, d);
-
-        if Board::valid(i) {
+        if let Some(j) = Direction::forward(i as i8, d) {
             // next should be opposite color
-            match &self.repl[i as usize] {
+            match &self.repl[j] {
                 None => false,
                 Some(x) => {
                     if !x.same(p) {
+                        let mut i = j;
                         // look for same color
                         loop {
-                            i = Direction::forward(i, d);
-
-                            // out of range
-                            if !Board::valid(i) {
+                            if let Some(j) = Direction::forward(i as i8, d) {
+                                i = j;
+                                match &self.repl[j] {
+                                    None => return false,
+                                    Some(x) => {
+                                        if x.same(p) {
+                                            return true
+                                        }
+                                    },
+                                }
+                            } else {
                                 return false
                             }
-                            match &self.repl[i as usize] {
-                                None => return false,
-                                Some(x) => {
-                                    if x.same(p) {
-                                        return true
-                                    }
-                                    // if opposite color, continue
-                                },
-                            }
                         }
-
                     } else {
                         false
                     }

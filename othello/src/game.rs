@@ -1,5 +1,8 @@
 mod object;
 
+use rand;
+use rand::Rng;
+
 use self::object::{Player, Piece, Board};
 
 pub enum Result {
@@ -16,6 +19,9 @@ pub enum Strategy {
 impl Strategy {
     pub fn pick_move(&self, b: &Board, moves: &mut Vec<Move>) -> Option<Move> {
         moves.pop()
+        // let mut rng = rand::thread_rng();
+        // let i: usize = rng.gen_range(0, moves.len());
+        // moves[i]
     }
 }
 
